@@ -1,83 +1,65 @@
-#drop table if exists Map;
+CREATE DATABASE IF NOT EXISTS Pollution;
+USE Pollution;
 
-#drop table if exists DataPollution;
+CREATE TABLE Location
+	(LocationId INT AUTO_INCREMENT, 
+     PollutionRadius	INT,
+     Address VARCHAR(30),
+     Kommune VARCHAR(30),
+     zipcode INT,
+     latitude FLOAT,
+     longitude FLOAT,
+	 PRIMARY KEY (LocationId)
+	);
 
-#drop table if exists Staff;
-
-#drop table if exists Sensor;
-
-#drop table if exists Users;
-
-#Drop table if exists Address;
-
-
-
-
-
-
-
-
-CREATE TABLE Address
-	(AddressId 		INT, 
-	 Address 	VARCHAR(30),
-     Kommune	VARCHAR(30),
-     PostalCode	INT,
-	 PRIMARY KEY (AddressId)
-	); 
-    
-    
 CREATE TABLE Users
-	(AddressId 		INT, 
-     UserId			INT,
+	(LocationId 		INT, 
+     UserId			INT AUTO_INCREMENT,
 	 FirstName 	VARCHAR(30),
      LastName	VARCHAR(30),
-     email 		varchar(30),
-	 PRIMARY KEY (UserId,AddressId),
-     FOREIGN KEY (AddressId) REFERENCES Address(AddressId)
+     email 		VARCHAR(30),
+     phoneNumber VARCHAR(30),
+     dateJoined DATE,
+	 PRIMARY KEY (UserId),
+     FOREIGN KEY (LocationId) REFERENCES Location(LocationId) ON DELETE CASCADE
 	); 
     
 
 CREATE TABLE Staff
-	(AddressId 		INT, 
-     StaffId			INT,
+	(LocationId 		INT, 
+     StaffId			INT AUTO_INCREMENT,
 	 FirstName 	VARCHAR(30),
      LastName	VARCHAR(30),
-     email 		varchar(30),
+     email 		VARCHAR(30),
      role		VARCHAR(30),
-	 PRIMARY KEY (AddressId),
-     FOREIGN KEY (AddressId) REFERENCES Address(AddressId)
+	 PRIMARY KEY (StaffId),
+     FOREIGN KEY (LocationId) REFERENCES Location(LocationId) ON DELETE CASCADE
 	); 
     
 
 CREATE TABLE Sensor
-	(AddressId 		INT, 
-     SensorId		INT,
+	(LocationId 		INT, 
+     SensorId		INT AUTO_INCREMENT,
 	 DateSetUp 		DATE,
      SensorType	VARCHAR(30),
-	 PRIMARY KEY (SensorId,AddressId),
-     FOREIGN KEY (AddressId) REFERENCES Address(AddressId)
+	 PRIMARY KEY (SensorId),
+     FOREIGN KEY (LocationId) REFERENCES Location(LocationId) ON DELETE CASCADE
 	); 
     
 CREATE TABLE DataPollution
-	(SensorId		INT,
+	(SensorId		INT AUTO_INCREMENT,
 	 LivePollution 	VARCHAR(30),
      ForeCast		VARCHAR(30),
 	 PRIMARY KEY (SensorId),
      FOREIGN KEY (SensorId) REFERENCES Sensor(SensorId)
 	); 
     
-    
-CREATE TABLE Map
-	(AddressId 			INT, 
-     SensorId			INT,
-	 UserId 			INT,
-     PollutionRadius	INT,
-	 PRIMARY KEY (AddressId,SensorId,UserId),
-     FOREIGN KEY (AddressId) REFERENCES Address(AddressId),
-     foreign key (SensorId) references Sensor(SensorId),
-     foreign key (UserId) references Users(UserId)
-	); 
-
-
-
-    
+CREATE TABLE Alarm
+	(AlarmId INT AUTO_INCREMENT,
+    AlarmText VARCHAR(45) NOT NULL,
+    date_ DATE,
+    SensorId INT,
+    UserId INT,
+    PRIMARY KEY (AlarmId),
+    FOREIGN KEY (SensorId) REFERENCES Sensor(SensorId) ON DELETE CASCADE,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE);
