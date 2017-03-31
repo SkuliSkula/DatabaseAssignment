@@ -26,7 +26,7 @@ CREATE TABLE Park
     FOREIGN KEY (locationId) REFERENCES Location(location_id) ON DELETE CASCADE,
     FOREIGN KEY (address_id) REFERENCES Address(address_id) ON DELETE CASCADE);
 
-CREATE TABLE `User` (
+CREATE TABLE User_ (
   user_id INT(11) NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(255) DEFAULT NULL,
   last_name VARCHAR(255) DEFAULT NULL,
@@ -114,7 +114,7 @@ INSERT INTO Park(name, address_id, pollution_radius, locationId) VALUES
 
 
     
-INSERT INTO `User`(first_name, last_name, email, phone_number, date_joined, address_id) VALUES 
+INSERT INTO User_(first_name, last_name, email, phone_number, date_joined, address_id) VALUES 
   ("Geoffrey","Osborne","posuere.cubilia.Curae@Vestibulum.edu","5205915","26-04-2012 16:40:51",1),
     ("Carlos","Duffy","In.tincidunt@odiovelest.com","0462843","29-05-2014 18:48:53",2),
     ("Lance","Weaver","quis@ametnulla.com","3848252","22-11-2012 03:11:20",3),
@@ -172,7 +172,7 @@ INSERT INTO Notification(message_id, date_, sensor_id, pollution_level) VALUES
 (1, "24-02-2013 19:18:34", 8, 10),
 (1, "24-02-2013 19:18:34", 1, 10);
 
-INSERT INTO Receives(user_id, notification_id) VALUES
+INSERT INTO Receives(notification_id, user_id) VALUES
 (1,1),
 (2,2),
 (3,3),
@@ -181,7 +181,35 @@ INSERT INTO Receives(user_id, notification_id) VALUES
 (6,6),
 (7,7);
 
+/***************************************************************************************** Advanced SQL **********************************************************************************************************/
+
+/* Create a trigger to insert into receives when a notification is sent*/
+
+/* First create a function that returns a random integer that will represent the user_id, the maximum value will be the number of users in the user_ table*/
+
+delimiter $$
+CREATE FUNCTION GET_USER_ID()
+RETURNS INT
+BEGIN
+  DECLARE user_id, max_, min_ INT;
+    SET min_ = 1;
+    SET max_ := (SELECT DISTINCT(LAST_INSERT_ID()) FROM user_);
+    SET user_id = (SELECT ROUND((RAND() * (max_-min_))+min_));
+    RETURN user_id;
+END; 
+$$
+delimiter;
 
 
-
-
+/*The trigger*/
+delimiter $$
+CREATE TRIGGER UPDATE_RECEIVES
+AFTER INSERT ON Notification
+FOR EACH ROW
+BEGIN
+  DECLARE user_id INTEGER;
+    SET user_id = GET_USER_ID();
+  INSERT Receives VALUES (New.notification_id, user_id);
+END;
+$$
+delimiter ;
