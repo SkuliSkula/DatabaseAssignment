@@ -157,6 +157,10 @@ INSERT INTO `Data`(pollution_type, pollution_value, sensor_id, date_) VALUES
 ("",2, 4, "08-01-2011 03:21:39"),
 ("",4, 7, "08-01-2011 03:21:39");
 
+/*Fix the empty strings in data*/
+UPDATE `Data` SET pollution_type = "No pollution type found" WHERE pollution_type = "";
+SELECT * FROM Data;
+
 INSERT INTO Message(`text`) VALUES
 ("Leave immediately"),
 ("Pollution level is rising in your area"),
@@ -212,4 +216,81 @@ BEGIN
   INSERT Receives VALUES (New.notification_id, user_id);
 END;
 $$
+delimiter ;
+
+/* Create a view to get all sensors that have logged a value above a specific level*/
+/* AQHI Air quality health index: Low 1-3, Moderate 4-6, High 7-10, Very High 10> */
+
+CREATE VIEW SENSOR_VALUE_MODERATE AS 
+  SELECT d.pollution_type, d.pollution_value, s.sensor_type 
+    FROM data d NATURAL JOIN sensor s
+    WHERE pollution_value > 3 AND pollution_value < 7;
+    
+SELECT * FROM sensor_value_moderate;
+
+/* Create a view to show the user his notifications*/
+CREATE VIEW MY_NOTIFICATIONS AS
+  SELECT m.text AS Message, n.date_ AS Date, n.pollution_value AS Pollution
+  FROM notification n , message m;
+
+/*Another way to do this is to create a procedure that gets a notification for a specific user*/
+delimiter $$
+CREATE PROCEDURE NOTIFICATIONS_BY_USER_ID(id INT(11))
+BEGIN 
+  SELECT n.date_ AS Date, n.pollution_level, m.text AS Message FROM notification n, receives r, message m WHERE r.user_id = id AND r.notification_id = n.notification_id AND n.message_id = m.message_id;
+END;
+$$ 
+delimiter ;
+CALL NOTIFICATIONS_BY_USER_ID(1);
+
+/*Create a trigger to validate data for Park*/  
+delimiter $$
+CREATE TRIGGER VALIDATE_POLLUTION_RADIUS
+  BEFORE INSERT ON Park
+    FOR EACH ROW
+    BEGIN
+    IF new.pollution_radius <= 0 
+        THEN SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Invalid pollution radius. Radius needs to be greater than 0'; 
+        END IF;
+  END;
+$$
+delimiter ;
+
+/*INSERT INTO Park(name, address_id, pollution_radius, locationId) VALUES
+  ('King´s Garden', 11, -2, 1);*/
+
+/*Create an event that reads data from the data table to display for instance on an big screen for monitoring. Updates every minute*/
+CREATE EVENT DISPLAY_DATA
+  ON SCHEDULE
+    EVERY 1 MINUTE
+        STARTS '2018-04-04 00:00:00' ON COMPLETION PRESERVE ENABLE
+        DO
+        SELECT pollution_type, pollution_value, sensor_type, latitude, longitude FROM `Data`, sensor, location WHERE data.sensor_id = sensor.sensor_id AND sensor.sensor_id = location.location_id;
+
+
+/*Create a procedure with a transaction do ensure data integrity when sending a notification*/
+delimiter $$
+CREATE PROCEDURE STORE_NOTIFICATION (message_id int(11), in date_ varchar(30), in sensor_id int(11), in pollution_level int(11))
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    -- Error
+    signal sqlstate '45000' set message_text = 'Error storing the notification';
+    ROLLBACK;
+END;
+DECLARE EXIT HANDLER FOR SQLWARNING
+  BEGIN
+    -- Warning
+    ROLLBACK;
+END;
+START TRANSACTION;
+
+INSERT INTO notification (message_id, date_, sensor_id, pollution_level) VALUES 
+  (message_id, date_, sensor_id, pollution_level);
+
+COMMIT;
+END;
+$$ 
 delimiter ;
