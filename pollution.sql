@@ -21,9 +21,9 @@ CREATE TABLE Park
     `Name` VARCHAR(30) NOT NULL DEFAULT '',
     address_id INT(11),
     pollution_radius INT(11),
-    locationId INT(11),
+    location_id INT(11),
     PRIMARY KEY (id),
-    FOREIGN KEY (locationId) REFERENCES Location(location_id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES Location(location_id) ON DELETE CASCADE,
     FOREIGN KEY (address_id) REFERENCES Address(address_id) ON DELETE CASCADE);
 
 CREATE TABLE User_ (
@@ -106,7 +106,7 @@ INSERT INTO Location(latitude, longitude) VALUES
     (55.6745665, 12.5318787 ),
     (55.6623962, 12.530983 );
     
-INSERT INTO Park(name, address_id, pollution_radius, locationId) VALUES
+INSERT INTO Park(name, address_id, pollution_radius, location_id) VALUES
 	('King´s Garden', 11, 2, 1),
     ('Botanical Garden', 12, 3, 2),
     ('Assistens Cemetery', 13, 1, 3),
@@ -283,7 +283,7 @@ CREATE TRIGGER VALIDATE_POLLUTION_RADIUS
 $$
 delimiter ;
 
-/*INSERT INTO Park(name, address_id, pollution_radius, locationId) VALUES
+/*INSERT INTO Park(name, address_id, pollution_radius, location_id) VALUES
 	('King´s Garden', 11, -2, 1);*/
 
 /*Create an event that reads data from the data table to display for instance on an big screen for monitoring. Updates every minute*/
