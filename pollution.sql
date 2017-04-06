@@ -70,14 +70,15 @@ CREATE TABLE Notification
     pollution_level INT(11),
     PRIMARY KEY (notification_id),
     FOREIGN KEY (sensor_id) REFERENCES Sensor(sensor_id) ON DELETE CASCADE,
-    FOREIGN KEY (message_id) REFERENCES Message(message_id));
+    FOREIGN KEY (message_id) REFERENCES Message(message_id) ON DELETE CASCADE
+    );
     
 CREATE TABLE Receives
 	(notification_id INT(11),
     user_id INT(11),
     PRIMARY KEY (notification_id, user_id),
     FOREIGN KEY (notification_id) REFERENCES Notification(notification_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES User_(user_id) ON DELETE CASCADE
     );
 
 /********************************************************************************INSERT DATA INTO THE DATABASE****************************************************/
