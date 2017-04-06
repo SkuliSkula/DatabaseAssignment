@@ -165,12 +165,12 @@ SELECT * FROM Data;
 INSERT INTO Message(`text`) VALUES
 ("Leave immediately"),
 ("Pollution level is rising in your area"),
-("High Alert in your are"); 
+("High Alert in your area"); 
 
 /* AQHI Air quality health index: Low 1-3, Moderate 4-6, High 7-10, Very High 10> */
 INSERT INTO Notification(message_id, date_, sensor_id, pollution_level) VALUES
 (1, "24-02-2013 19:18:34", 1, 10),
-(2, "24-02-2013 19:18:34", 3, 7),
+(2, "17-08-2017 10:32:00", 3, 7),
 (1, "24-02-2013 19:18:34", 5, 10),
 (1, "24-02-2013 19:18:34", 6, 10),
 (1, "24-02-2013 19:18:34", 7, 10),
